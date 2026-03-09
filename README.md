@@ -2,7 +2,7 @@
 
 A full-stack web application for creating and sharing music stories. Users log in with Google, then can write, edit, and delete their own stories — and browse public stories from other users.
 
-🔗 **Live demo:** [music-stories.onrender.com](https://music-stories-4uvz.onrender.com)
+🔗 **Live demo:** [music-stories-4uvz.onrender.com](https://music-stories-4uvz.onrender.com)
 
 ---
 
