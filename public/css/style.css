@@ -1,0 +1,33 @@
+p {
+  margin: 10px 0 !important;
+  letter-spacing: 0rem;
+}
+
+.fa-small {
+  font-size: 14px !important;
+}
+
+
+.fa-small:hover{
+  font-size: 25px !important;
+  
+}
+.storytitle{
+  color: #198cf0;
+  font-weight: bold;
+}
+a {
+  color: black;
+}
+
+h3{
+  letter-spacing: 0.2rem;
+}
+
+.login-container {
+  width: 500px;
+  margin-top: 50px;
+  text-align: center;
+}
+
+

@@ -1,0 +1,36 @@
+{
+  "name": "music-stories",
+  "version": "1.0.0",
+  "description": "A full-stack web app for sharing music stories. Built with Node.js, Express, MongoDB Atlas and Google OAuth2.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index",
+    "dev": "nodemon index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shopatomek/music-stories.git"
+  },
+  "author": "Tomasz Szopa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shopatomek/music-stories/issues"
+  },
+  "homepage": "https://github.com/shopatomek/music-stories#readme",
+  "dependencies": {
+    "connect-mongo": "^4.6.0",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.2",
+    "express-handlebars": "^6.0.5",
+    "express-session": "^1.17.2",
+    "method-override": "^3.0.0",
+    "moment": "^2.29.3",
+    "mongoose": "^6.3.0",
+    "morgan": "^1.10.0",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
