@@ -1,12 +1,26 @@
-# Music Stories
+# 📖 Music Stories
 
 A full-stack web application for creating and sharing music stories. Users log in with Google, then can write, edit, and delete their own stories — and browse public stories from other users.
 
-🔗 **Live demo:** [music-stories-4uvz.onrender.com](https://music-stories-4uvz.onrender.com)
+> **Live demo:** [music-stories-4uvz.onrender.com](https://music-stories-4uvz.onrender.com)
+
+> ⚠️ Hosted on Render free tier — first load may take 30–60 seconds while the server wakes up.
 
 ---
 
-## Tech Stack
+## ✨ Features
+
+- Google OAuth 2.0 login
+- Create, edit and delete your own stories
+- Public / private story visibility
+- Browse public stories from all users
+- Route protection — dashboard requires authentication
+- Session persistence backed by MongoDB
+- Rich text editing with CKEditor
+
+---
+
+## 🛠️ Tech Stack
 
 | Layer          | Technology                      |
 | -------------- | ------------------------------- |
@@ -21,49 +35,88 @@ A full-stack web application for creating and sharing music stories. Users log i
 
 ---
 
-## Features
+## 🏗️ Architecture
 
-- Google OAuth 2.0 login
-- Create, edit and delete your own stories
-- Public / private story visibility
-- Browse public stories from all users
-- Route protection — dashboard requires authentication
-- Session persistence backed by MongoDB
+```mermaid
+flowchart LR
+
+    subgraph Client["Browser"]
+        B[Handlebars Page]
+    end
+
+    subgraph Server["Backend — Render (monolith)"]
+        E[Express.js]
+        P[Passport.js]
+        HBS[Handlebars SSR]
+        S[express-session]
+
+        E --> P
+        E --> HBS
+        E --> S
+    end
+
+    subgraph Database["Database"]
+        M[(MongoDB Atlas)]
+    end
+
+    subgraph Auth["Auth"]
+        G[Google OAuth 2.0]
+    end
+
+    B <-->|HTTP requests| E
+    P <-->|OAuth flow| G
+    S <-->|Session store| M
+    E <-->|Mongoose ODM| M
+```
 
 ---
 
-## Local Setup
+## 🚀 Running Locally
 
-### Prerequisites
+To run this project locally you will need accounts and credentials for two external services: **MongoDB Atlas** and **Google Cloud Console**. Steps 1–2 below walk you through each one.
 
-- Node.js v18+
-- A [MongoDB Atlas](https://cloud.mongodb.com) account (free tier works)
-- A [Google Cloud Console](https://console.cloud.google.com) project with OAuth 2.0 credentials
+### 1. MongoDB Atlas
 
----
+1. Create a free account at [cloud.mongodb.com](https://cloud.mongodb.com)
+2. Create a new **free cluster** (M0)
+3. Under **Database Access** add a user with read/write permissions
+4. Under **Network Access** add `0.0.0.0/0` to allow connections from anywhere
+5. Click **Connect → Drivers → Node.js** and copy the connection string:
+   ```
+   mongodb+srv://<username>:<password>@<cluster>.mongodb.net/musicstories?retryWrites=true&w=majority
+   ```
 
-### 1. Clone the repository
+> ⚠️ **Windows / Node.js v18+ note:** If you get a `querySrv ECONNREFUSED` error, the `+srv` DNS lookup is failing on your machine. Use the direct connection string instead — find it in Atlas under **Connect → Shell**, then copy the hostname list. It looks like:
+>
+> ```
+> mongodb://<username>:<password>@cluster0-shard-00-00.<cluster>.mongodb.net:27017,cluster0-shard-00-01.<cluster>.mongodb.net:27017,cluster0-shard-00-02.<cluster>.mongodb.net:27017/musicstories?authSource=admin&retryWrites=true&w=majority&tls=true
+> ```
+>
+> See `.env.example` — the direct string is included there as a commented-out alternative.
+
+### 2. Google OAuth 2.0
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) and create a new project
+2. Go to **APIs & Services → OAuth consent screen**
+   - Choose **External**, fill in app name and your email
+   - Under **Test users** add your Gmail address
+3. Go to **APIs & Services → Credentials → Create Credentials → OAuth 2.0 Client ID**
+   - Application type: **Web application**
+   - Authorized redirect URIs: `http://localhost:5000/auth/google/callback`
+4. Copy the **Client ID** and **Client Secret**
+
+### 3. Clone & configure
 
 ```bash
 git clone https://github.com/shopatomek/music-stories.git
 cd music-stories
-```
-
-### 2. Install dependencies
-
-```bash
 npm install
-```
-
-### 3. Configure environment variables
-
-```bash
 cp .env.example .env
 ```
 
-Open `.env` and fill in your values. See the section below for how to obtain each one.
+Fill in `.env` with your credentials (see `.env.example` for details on each value).
 
-### 4. Run the app
+### 4. Run
 
 ```bash
 npm run dev
@@ -73,80 +126,28 @@ Open [http://localhost:5000](http://localhost:5000) in your browser.
 
 ---
 
-## Environment Variables — How to Get Each One
+## 🔒 Environment Variables Reference
 
-### `MONGO_URL` — MongoDB Atlas connection string
-
-1. Sign up / log in at [cloud.mongodb.com](https://cloud.mongodb.com)
-2. Create a free **Cluster**
-3. Go to **Database Access** → add a user with a password
-4. Go to **Network Access** → add your IP (or `0.0.0.0/0` to allow all)
-5. Click **Connect** on your cluster → **Drivers** → **Node.js** → copy the connection string
-6. Replace `<password>` with your database user's password
-
-> **Node.js v24 on Windows:** If you get a `querySrv ECONNREFUSED` error with the `mongodb+srv://` format, select an older driver version in the Atlas Connect dialog to get a direct connection string with explicit hostnames and port numbers.
+| Variable               | Where to find it                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| `MONGO_URL`            | MongoDB Atlas → Connect → Drivers → Node.js                                          |
+| `SESSION_SECRET`       | Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `GOOGLE_CLIENT_ID`     | Google Cloud Console → APIs & Services → Credentials → OAuth 2.0 Client              |
+| `GOOGLE_CLIENT_SECRET` | Same as above                                                                        |
+| `GOOGLE_CALLBACK_URL`  | `http://localhost:5000/auth/google/callback` for local                               |
+| `NODE_ENV`             | `development` locally, `production` on Render                                        |
 
 ---
 
-### `SESSION_SECRET` — session signing secret
+## ☁️ Deployment on Render
 
-Generate a secure random string in your terminal:
-
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-Copy the output and paste it as the value.
-
----
-
-### `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` — Google OAuth credentials
-
-1. Go to [console.cloud.google.com](https://console.cloud.google.com)
-2. Create a new project (or select an existing one)
-3. Go to **APIs & Services → OAuth consent screen**
-   - Choose **External**
-   - Fill in app name and your email
-   - Under **Test users**, add your Gmail address
-4. Go to **APIs & Services → Credentials → Create Credentials → OAuth 2.0 Client ID**
-   - Application type: **Web application**
-   - Authorized redirect URIs: `http://localhost:5000/auth/google/callback`
-5. Copy the **Client ID** and **Client Secret**
-
----
-
-### `GOOGLE_CALLBACK_URL`
-
-For local development:
-
-```
-http://localhost:5000/auth/google/callback
-```
-
-For production (Render), change to:
-
-```
-https://your-app.onrender.com/auth/google/callback
-```
-
----
-
-### `NODE_ENV`
-
-Set to `development` locally, `production` on Render.
-
----
-
-## Deployment on Render
-
-This app deploys as a monolith on [Render](https://render.com). Because it uses server-side rendering and session management, it requires a persistent server — Vercel is not suitable for this architecture.
+This app deploys as a **monolith** on [Render](https://render.com). Because it uses server-side rendering and session management it requires a persistent server — Vercel is not suitable for this architecture.
 
 ### Steps
 
 1. Push your code to GitHub
-2. Go to [render.com](https://render.com) → **New → Web Service**
-3. Connect your GitHub repository
-4. Configure:
+2. Go to [render.com](https://render.com) → **New → Web Service** → connect your repo
+3. Configure:
 
 | Field         | Value         |
 | ------------- | ------------- |
@@ -154,19 +155,23 @@ This app deploys as a monolith on [Render](https://render.com). Because it uses 
 | Start Command | `node index`  |
 | Instance Type | Free          |
 
-5. Add all environment variables from `.env.example` in the **Environment** tab — use your production values (update `GOOGLE_CALLBACK_URL` to your Render URL)
+4. Add all variables from `.env.example` in the **Environment** tab, using production values:
+   - `MONGO_URL` → your Atlas connection string with `/musicstories`
+   - `CORS_ORIGIN` → your Render URL
+   - `GOOGLE_CALLBACK_URL` → `https://your-app.onrender.com/auth/google/callback`
+   - `NODE_ENV` → `production`
 
-6. In Google Cloud Console → **Credentials** → your OAuth client → add your Render URL to **Authorized redirect URIs**:
+5. In Google Cloud Console → your OAuth client → add to **Authorized redirect URIs**:
 
-```
-https://your-app.onrender.com/auth/google/callback
-```
+   ```
+   https://your-app.onrender.com/auth/google/callback
+   ```
 
-7. Click **Deploy**
+6. Click **Deploy**
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 music-stories/
@@ -176,7 +181,7 @@ music-stories/
 │   └── auth.js             # ensureAuth / ensureGuest route guards
 ├── models/
 │   ├── story.js            # Story schema
-│   └── user.js             # User schema (populated from Google profile)
+│   └── user.js             # User schema (from Google profile)
 ├── routes/
 │   ├── auth.js             # /auth/google, /auth/logout
 │   ├── index.js            # / (login page), /dashboard
@@ -192,10 +197,10 @@ music-stories/
 
 ---
 
-## License
+## 👤 Author
 
-ISC
+**Tomasz Szopa**
+&nbsp;·&nbsp; [shopa.tomek@gmail.com](mailto:shopa.tomek@gmail.com)
+&nbsp;·&nbsp; [GitHub](https://github.com/shopatomek)
 
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://github.com/shopatomek/music-stories/blob/main/LICENSE)
-
-Copyright 2022 Tomasz Szopa
